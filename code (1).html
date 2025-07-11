@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Visualizer - Kiran's CSE Project</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles */
+        .algorithm-container {
+            height: 300px;
+            background-color: #f3f4f6;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .array-bar {
+            width: 20px;
+            margin: 0 2px;
+            display: inline-block;
+            background-color: #3b82f6;
+            transition: height 0.3s ease;
+        }
+        
+        .node {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: absolute;
+        }
+        
+        .path-node {
+            background-color: #f59e0b;
+        }
+        
+        .start-node {
+            background-color: #10b981;
+        }
+        
+        .end-node {
+            background-color: #ef4444;
+        }
+        
+        .wall-node {
+            background-color: #1e293b;
+        }
+        
+        .visited-node {
+            background-color: #7c3aed;
+        }
+        
+        .grid {
+            display: grid;
+            gap: 1px;
+            background-color: #e5e7eb;
+        }
+        
+        .grid-cell {
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Animation for sorting */
+        @keyframes swapAnimation {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .swapping {
+            animation: swapAnimation 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="bg-indigo-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold">Algorithm Visualizer</h1>
+            <p class="mt-2">By Kiran - Visualizing sorting, pathfinding and tree algorithms</p>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-4 py-3">
+                <button onclick="showSection('sorting')" class="px-4 py-2 font-medium text-indigo-600 hover:bg-indigo-50 rounded-md">Sorting</button>
+                <button onclick="showSection('pathfinding')" class="px-4 py-2 font-medium text-indigo-600 hover:bg-indigo-50 rounded-md">Pathfinding</button>
+                <button onclick="showSection('trees')" class="px-4 py-2 font-medium text-indigo-600 hover:bg-indigo-50 rounded-md">Binary Trees</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Sorting Algorithm Section -->
+        <section id="sorting-section" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4">Sorting Algorithms</h2>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex flex-wrap gap-4 mb-6">
+                    <button onclick="generateNewArray()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Generate New Array</button>
+                    <button onclick="bubbleSort()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Bubble Sort</button>
+                    <button onclick="selectionSort()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Selection Sort</button>
+                    <button onclick="insertionSort()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Insertion Sort</button>
+                    <button onclick="mergeSort()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Merge Sort</button>
+                    <button onclick="quickSort()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Quick Sort</button>
+                </div>
+                
+                <div class="algorithm-container flex items-end" id="sorting-container"></div>
+                
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold mb-2">Algorithm Explanation</h3>
+                    <div id="sorting-explanation" class="prose">
+                        <p>Select an algorithm to see its explanation and visualization.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pathfinding Algorithm Section -->
+        <section id="pathfinding-section" class="mb-12 hidden">
+            <h2 class="text-2xl font-bold mb-4">Pathfinding Algorithms</h2>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex flex-wrap gap-4 mb-6">
+                    <button onclick="generateMaze()" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">Generate Maze</button>
+                    <button onclick="clearBoard()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">Clear Board</button>
+                    <button onclick="startPathfinding('bfs')" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">Breadth-First Search</button>
+                    <button onclick="startPathfinding('dfs')" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">Depth-First Search</button>
+                    <button onclick="startPathfinding('dijkstra')" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">Dijkstra's Algorithm</button>
+                    <button onclick="startPathfinding('astar')" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">A* Algorithm</button>
+                </div>
+                
+                <div class="grid" id="pathfinding-grid" style="grid-template-columns: repeat(20, 1fr); height: 400px;"></div>
+                
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold mb-2">Instructions</h3>
+                    <ul class="list-disc pl-5">
+                        <li>Click and drag to create walls</li>
+                        <li>Drag the start (green) or end (red) nodes to move them</li>
+                        <li>Select an algorithm to visualize the pathfinding</li>
+                    </ul>
+                    
+                    <h3 class="text-lg font-semibold mt-4 mb-2">Algorithm Explanation</h3>
+                    <div id="pathfinding-explanation" class="prose">
+                        <p>Select an algorithm to see its explanation and visualization.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Binary Tree Section -->
+        <section id="trees-section" class="mb-12 hidden">
+            <h2 class="text-2xl font-bold mb-4">Binary Tree Operations</h2>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex flex-wrap gap-4 mb-6">
+                    <button onclick="generateRandomTree()" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition">Generate Random Tree</button>
+                    <button onclick="traverseTree('inorder')" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition">Inorder Traversal</button>
+                    <button onclick="traverseTree('preorder')" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition">Preorder Traversal</button>
+                    <button onclick="traverseTree('postorder')" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition">Postorder Traversal</button>
+                    <button onclick="insertNode()" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition">Insert Node</button>
+                    <button onclick="deleteNode()" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition">Delete Node</button>
+                </div>
+                
+                <div class="algorithm-container relative" id="tree-container"></div>
+                
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold mb-2">Traversal Result</h3>
+                    <div id="traversal-result" class="font-mono bg-gray-100 p-3 rounded"></div>
+                    
+                    <h3 class="text-lg font-semibold mt-4 mb-2">Tree Properties</h3>
+                    <div id="tree-properties" class="prose">
+                        <p>Tree height: <span id="tree-height">0</span></p>
+                        <p>Number of nodes: <span id="node-count">0</span></p>
+                        <p>Is balanced: <span id="is-balanced">No</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p>Algorithm Visualizer Project by Kiran</p>
+            <p class="mt-2 text-gray-400">CSE Project - GitHub: kiran123-ai</p>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let array = [];
+        let tree = null;
+        let isSorting = false;
+        let isPathfinding = false;
+        let isTraversing = false;
+        let startNode = null;
+        let endNode = null;
+        let grid = [];
+        const GRID_ROWS = 20;
+        const GRID_COLS = 20;
+        
+        // DOM elements
+        const sortingContainer = document.getElementById('sorting-container');
+        const treeContainer = document.getElementById('tree-container');
+        const pathfindingGrid = document.getElementById('pathfinding-grid');
+        const traversalResult = document.getElementById('traversal-result');
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            generateNewArray();
+            initializePathfindingGrid();
+            generateRandomTree();
+        });
+        
+        // Section navigation
+        function showSection(section) {
+            document.querySelectorAll('section').forEach(s => {
+                s.classList.add('hidden');
+            });
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+        }
+        
+        // ========== Sorting Algorithms ==========
+        function generateNewArray() {
+            if (isSorting) return;
+            
+            array = [];
+            sortingContainer.innerHTML = '';
+            
+            const containerWidth = sortingContainer.clientWidth;
+            const barWidth = Math.floor(containerWidth / 20) - 4;
+            const maxHeight = sortingContainer.clientHeight - 10;
+            
+            for (let i = 0; i < 20; i++) {
+                const value = Math.floor(Math.random() * maxHeight) + 5;
+                array.push(value);
+                
+                const bar = document.createElement('div');
+                bar.className = 'array-bar';
+                bar.style.height = `${value}px`;
+                bar.style.width = `${barWidth}px`;
+                bar.setAttribute('data-value', value);
+                sortingContainer.appendChild(bar);
+            }
+            
+            document.getElementById('sorting-explanation').innerHTML = `
+                <p>A new array of random values has been generated. Select a sorting algorithm to visualize how it works.</p>
+            `;
+        }
+        
+        async function bubbleSort() {
+            if (isSorting) return;
+            isSorting = true;
+            
+            const bars = document.querySelectorAll('.array-bar');
+            const explanation = document.getElementById('sorting-explanation');
+            
+            explanation.innerHTML = `
+                <h4>Bubble Sort</h4>
+                <p>Bubble sort is a simple sorting algorithm that repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order.</p>
+                <p><strong>Time Complexity:</strong> O(n²) in worst and average cases, O(n) in best case (already sorted)</p>
+                <p><strong>Space Complexity:</strong> O(1)</p>
+            `;
+            
+            for (let i = 0; i < array.length; i++) {
+                for (let j = 0; j < array.length - i - 1; j++) {
+                    if (array[j] > array[j + 1]) {
+                        // Swap values
+                        [array[j], array[j + 1]] = [array[j + 1], array[j]];
+                        
+                        // Update DOM
+                        bars[j].style.height = `${array[j]}px`;
+                        bars[j + 1].style.height = `${array[j + 1]}px`;
+                        
+                        bars[j].classList.add('swapping');
+                        bars[j + 1].classList.add('swapping');
+                        
+                        // Highlight compared elements
+                        bars[j].style.backgroundColor = '#ef4444';
+                        bars[j + 1].style.backgroundColor = '#ef4444';
+                        
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        
+                        bars[j].classList.remove('swapping');
+                        bars[j + 1].classList.remove('swapping');
+                        
+                        bars[j].style.backgroundColor = '#3b82f6';
+                        bars[j + 1].style.backgroundColor = '#3b82f6';
+                    }
+                }
+                
+                // Mark sorted elements
+                bars[array.length - i - 1].style.backgroundColor = '#10b981';
+            }
+            
+            // Mark all as sorted
+            bars.forEach(bar => {
+                bar.style.backgroundColor = '#10b981';
+            });
+            
+            isSorting = false;
+        }
+        
+        async function selectionSort() {
+            if (isSorting) return;
+            isSorting = true;
+            
+            const bars = document.querySelectorAll('.array-bar');
+            const explanation = document.getElementById('sorting-explanation');
+            
+            explanation.innerHTML = `
+                <h4>Selection Sort</h4>
+                <p>Selection sort divides the input list into two parts: a sorted sublist and an unsorted sublist. It repeatedly finds the minimum element from the unsorted part and puts it at the end of the sorted part.</p>
+                <p><strong>Time Complexity:</strong> O(n²) in all cases</p>
+                <p><strong>Space Complexity:</strong> O(1)</p>
+            `;
+            
+            for (let i = 0; i < array.length - 1; i++) {
+                let minIndex = i;
+                
+                // Highlight current minimum
+                bars[minIndex].style.backgroundColor = '#f59e0b';
+                
+                for (let j = i + 1; j < array.length; j++) {
+                    // Highlight current comparison
+                    bars[j].style.backgroundColor = '#ef4444';
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    
+                    if (array[j] < array[minIndex]) {
+                        // Reset previous min color
+                        bars[minIndex].style.backgroundColor = '#3b82f6';
+                        minIndex = j;
+                        
+                        // Highlight new min
+                        bars[minIndex].style.backgroundColor = '#f59e0b';
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                    } else {
+                        // Reset comparison color
+                        bars[j].style.backgroundColor = '#3b82f6';
+                    }
+                }
+                
+                if (minIndex !== i) {
+                    // Swap values
+                    [array[i], array[minIndex]] = [array[minIndex], array[i]];
+                    
+                    // Update DOM
+                    bars[i].style.height = `${array[i]}px`;
+                    bars[minIndex].style.height = `${array[minIndex]}px`;
+                    
+                    bars[i].classList.add('swapping');
+                    bars[minIndex].classList.add('swapping');
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    bars[i].classList.remove('swapping');
+                    bars[minIndex].classList.remove('swapping');
+                }
+                
+                // Mark sorted element
+                bars[i].style.backgroundColor = '#10b981';
+                
+                // Reset min color if it wasn't swapped
+                if (minIndex !== i) {
+                    bars[minIndex].style.backgroundColor = '#3b82f6';
+                }
+            }
+            
+            // Mark last element as sorted
+            bars[array.length - 1].style.backgroundColor = '#10b981';
+            isSorting = false;
+        }
+        
+        async function insertionSort() {
+            if (isSorting) return;
+            isSorting = true;
+            
+            const bars = document.querySelectorAll('.array-bar');
+            const explanation = document.getElementById('sorting-explanation');
+            
+            explanation.innerHTML = `
+                <h4>Insertion Sort</h4>
+                <p>Insertion sort builds the final sorted array one item at a time. It takes each element from the unsorted part and inserts it into its correct position in the sorted part.</p>
+                <p><strong>Time Complexity:</strong> O(n²) in worst and average cases, O(n) in best case (already sorted)</p>
+                <p><strong>Space Complexity:</strong> O(1)</p>
+            `;
+            
+            bars[0].style.backgroundColor = '#10b981'; // First element is sorted
+            
+            for (let i = 1; i < array.length; i++) {
+                let j = i;
+                bars[j].style.backgroundColor = '#f59e0b'; // Highlight current element
+                
+                while (j > 0 && array[j] < array[j - 1]) {
+                    // Highlight comparison
+                    bars[j - 1].style.backgroundColor = '#ef4444';
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    // Swap values
+                    [array[j], array[j - 1]] = [array[j - 1], array[j]];
+                    
+                    // Update DOM
+                    bars[j].style.height = `${array[j]}px`;
+                    bars[j - 1].style.height = `${array[j - 1]}px`;
+                    
+                    bars[j].classList.add('swapping');
+                    bars[j - 1].classList.add('swapping');
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    bars[j].classList.remove('swapping');
+                    bars[j - 1].classList.remove('swapping');
+                    
+                    // Reset colors
+                    bars[j].style.backgroundColor = '#3b82f6';
+                    j--;
+                    
+                    if (j > 0) {
+                        bars[j - 1].style.backgroundColor = '#ef4444';
+                    }
+                }
+                
+                // Mark as sorted
+                bars[j].style.backgroundColor = '#10b981';
+                
+                // Reset colors of remaining elements
+                for (let k = i + 1; k < array.length; k++) {
+                    bars[k].style.backgroundColor = '#3b82f6';
+                }
+            }
+            
+            isSorting = false;
+        }
+        
+        async function mergeSort() {
+            if (isSorting) return;
+            isSorting = true;
+            
+            const explanation = document.getElementById('sorting-explanation');
+            explanation.innerHTML = `
+                <h4>Merge Sort</h4>
+                <p>Merge sort is a divide-and-conquer algorithm that divides the input array into two halves, recursively sorts them, and then merges the two sorted halves.</p>
+                <p><strong>Time Complexity:</strong> O(n log n) in all cases</p>
+                <p><strong>Space Complexity:</strong> O(n)</p>
+            `;
+            
+            await mergeSortHelper(0, array.length - 1);
+            
+            // Mark all as sorted
+            const bars = document.querySelectorAll('.array-bar');
+            bars.forEach(bar => {
+                bar.style.backgroundColor = '#10b981';
+            });
+            
+            isSorting = false;
+        }
+        
+        async function mergeSortHelper(l, r) {
+            if (l < r) {
+                const m = Math.floor((l + r) / 2);
+                
+                await mergeSortHelper(l, m);
+                await mergeSortHelper(m + 1, r);
+                await merge(l, m, r);
+            }
+        }
+        
+        async function merge(l, m, r) {
+            const bars = document.querySelectorAll('.array-bar');
+            const n1 = m - l + 1;
+            const n2 = r - m;
+            
+            // Create temp arrays
+            const L = new Array(n1);
+            const R = new Array(n2);
+            
+            // Copy data to temp arrays
+            for (let i = 0; i < n1; i++) {
+                L[i] = array[l + i];
+                bars[l + i].style.backgroundColor = '#f59e0b';
+            }
+            for (let j = 0; j < n2; j++) {
+                R[j] = array[m + 1 + j];
+                bars[m + 1 + j].style.backgroundColor = '#7c3aed';
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
+            // Merge the temp arrays
+            let i = 0, j = 0, k = l;
+            
+            while (i < n1 && j < n2) {
+                if (L[i] <= R[j]) {
+                    array[k] = L[i];
+                    bars[k].style.height = `${array[k]}px`;
+                    bars[k].style.backgroundColor = '#3b82f6';
+                    i++;
+                } else {
+                    array[k] = R[j];
+                    bars[k].style.height = `${array[k]}px`;
+                    bars[k].style.backgroundColor = '#3b82f6';
+                    j++;
+                }
+                k++;
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+            
+            // Copy remaining elements of L[]
+            while (i < n1) {
+                array[k] = L[i];
+                bars[k].style.height = `${array[k]}px`;
+                bars[k].style.backgroundColor = '#3b82f6';
+                i++;
+                k++;
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+            
+            // Copy remaining elements of R[]
+            while (j < n2) {
+                array[k] = R[j];
+                bars[k].style.height = `${array[k]}px`;
+                bars[k].style.backgroundColor = '#3b82f6';
+                j++;
+                k++;
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+        }
+        
+        async function quickSort() {
+            if (isSorting) return;
+            isSorting = true;
+            
+            const explanation = document.getElementById('sorting-explanation');
+            explanation.innerHTML = `
+                <h4>Quick Sort</h4>
+                <p>Quick sort is a divide-and-conquer algorithm that selects a 'pivot' element and partitions the array around the pivot, placing smaller elements before it and larger elements after it.</p>
+                <p><strong>Time Complexity:</strong> O(n log n) in average case, O(n²) in worst case</p>
+                <p><strong>Space Complexity:</strong> O(log n)</p>
+            `;
+            
+            await quickSortHelper(0, array.length - 1);
+            
+            // Mark all as sorted
+            const bars = document.querySelectorAll('.array-bar');
+            bars.forEach(bar => {
+                bar.style.backgroundColor = '#10b981';
+            });
+            
+            isSorting = false;
+        }
+        
+        async function quickSortHelper(low, high) {
+            if (low < high) {
+                const pi = await partition(low, high);
+                
+                await quickSortHelper(low, pi - 1);
+                await quickSortHelper(pi + 1, high);
+            }
+        }
+        
+        async function partition(low, high) {
+            const bars = document.querySelectorAll('.array-bar');
+            const pivot = array[high];
+            bars[high].style.backgroundColor = '#ef4444'; // Highlight pivot
+            
+            let i = low - 1;
+            
+            for (let j = low; j < high; j++) {
+                bars[j].style.backgroundColor = '#f59e0b'; // Highlight current element
+                await new Promise(resolve => setTimeout(resolve, 50));
+                
+                if (array[j] < pivot) {
+                    i++;
+                    
+                    // Swap array[i] and array[j]
+                    [array[i], array[j]] = [array[j], array[i]];
+                    
+                    // Update DOM
+                    bars[i].style.height = `${array[i]}px`;
+                    bars[j].style.height = `${array[j]}px`;
+                    
+                    bars[i].classList.add('swapping');
+                    bars[j].classList.add('swapping');
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    bars[i].classList.remove('swapping');
+                    bars[j].classList.remove('swapping');
+                    
+                    bars[i].style.backgroundColor = '#3b82f6';
+                    bars[j].style.backgroundColor = '#3b82f6';
+                } else {
+                    bars[j].style.backgroundColor = '#3b82f6';
+                }
+            }
+            
+            // Swap array[i+1] and array[high] (pivot)
+            [array[i + 1], array[high]] = [array[high], array[i + 1]];
+            
+            // Update DOM
+            bars[i + 1].style.height = `${array[i + 1]}px`;
+            bars[high].style.height = `${array[high]}px`;
+            
+            bars[i + 1].classList.add('swapping');
+            bars[high].classList.add('swapping');
+            await new Promise(resolve => setTimeout(resolve, 50));
+            bars[i + 1].classList.remove('swapping');
+            bars[high].classList.remove('swapping');
+            
+            bars[i + 1].style.backgroundColor = '#10b981'; // Mark pivot position as sorted
+            bars[high].style.backgroundColor = '#3b82f6';
+            
+            return i + 1;
+        }
+        
+        // ========== Pathfinding Algorithms ==========
+        function initializePathfindingGrid() {
+            pathfindingGrid.innerHTML = '';
+            grid = [];
+            
+            for (let row = 0; row < GRID_ROWS; row++) {
+                grid[row] = [];
+                for (let col = 0; col < GRID_COLS; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    
+                    // Add event listeners for wall creation
+                    cell.addEventListener('mousedown', () => toggleWall(row, col));
+                    cell.addEventListener('mouseenter', (e) => {
+                        if (e.buttons === 1) {
+                            toggleWall(row, col);
+                        }
+                    });
+                    
+                    pathfindingGrid.appendChild(cell);
+                    grid[row][col] = { row, col, isWall: false, element: cell };
+                }
+            }
+            
+            // Set start and end nodes
+            startNode = grid[5][5];
+            endNode = grid[15][15];
+            
+            startNode.element.classList.add('start-node');
+            endNode.element.classList.add('end-node');
+            
+            // Make start and end nodes draggable
+            makeDraggable(startNode);
+            makeDraggable(endNode);
+            
+            document.getElementById('pathfinding-explanation').innerHTML = `
+                <p>The grid represents a maze where you can create walls by clicking or dragging. The green node is the start, and the red node is the end.</p>
+                <p>Select a pathfinding algorithm to visualize how it finds the shortest path.</p>
+            `;
+        }
+        
+        function toggleWall(row, col) {
+            const node = grid[row][col];
+            
+            // Don't allow walls on start or end nodes
+            if (node === startNode || node === endNode) return;
+            
+            node.isWall = !node.isWall;
+            node.element.className = node.isWall ? 'grid-cell wall-node' : 'grid-cell';
+        }
+        
+        function makeDraggable(node) {
+            node.element.draggable = true;
+            
+            node.element.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', `${node.row},${node.col}`);
+            });
+            
+            node.element.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            
+            node.element.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const [row, col] = e.dataTransfer.getData('text/plain').split(',').map(Number);
+                const draggedNode = grid[row][col];
+                
+                // Don't allow dropping on walls or the other special node
+                if (node.isWall || 
+                    (draggedNode === startNode && node === endNode) || 
+                    (draggedNode === endNode && node === startNode)) {
+                    return;
+                }
+                
+                // Clear old position
+                draggedNode.element.className = 'grid-cell';
+                
+                // Update new position
+                if (draggedNode === startNode) {
+                    startNode = node;
+                    node.element.className = 'grid-cell start-node';
+                } else if (draggedNode === endNode) {
+                    endNode = node;
+                    node.element.className = 'grid-cell end-node';
+                }
+                
+                // Make the new node draggable
+                makeDraggable(node);
+            });
+        }
+        
+        function clearBoard() {
+            if (isPathfinding) return;
+            
+            for (let row = 0; row < GRID_ROWS; row++) {
+                for (let col = 0; col < GRID_COLS; col++) {
+                    const node = grid[row][col];
+                    node.isWall = false;
+                    
+                    if (node === startNode) {
+                        node.element.className = 'grid-cell start-node';
+                    } else if (node === endNode) {
+                        node.element.className = 'grid-cell end-node';
+                    } else {
+                        node.element.className = 'grid-cell';
+                    }
+                }
+            }
+        }
+        
+        function generateMaze() {
+            if (isPathfinding) return;
+            clearBoard();
+            
+            // Simple maze generation - random walls
+            for (let row = 0; row < GRID_ROWS; row++) {
+                for (let col = 0; col < GRID_COLS; col++) {
+                    // Skip start and end nodes
+                    if ((row === startNode.row && col === startNode.col) || 
+                        (row === endNode.row && col === endNode.col)) {
+                        continue;
+                    }
+                    
+                    // 25% chance to be a wall
+                    if (Math.random() < 0.25) {
+                        grid[row][col].isWall = true;
+                        grid[row][col].element.className = 'grid-cell wall-node';
+                    }
+                }
+            }
+        }
+        
+        async function startPathfinding(algorithm) {
+            if (isPathfinding) return;
+            isPathfinding = true;
+            
+            // Clear previous pathfinding visuals
+            for (let row = 0; row < GRID_ROWS; row++) {
+                for (let col = 0; col < GRID_COLS; col++) {
+                    const node = grid[row][col];
+                    if (!node.isWall && node !== startNode && node !== endNode) {
+                        node.element.className = 'grid-cell';
+                    }
+                }
+            }
+            
+            const explanation = document.getElementById('pathfinding-explanation');
+            
+            switch (algorithm) {
+                case 'bfs':
+                    explanation.innerHTML = `
+                        <h4>Breadth-First Search (BFS)</h4>
+                        <p>BFS explores all neighbor nodes at the present depth before moving on to nodes at the next depth level.</p>
+                        <p><strong>Completeness:</strong> Yes (finds shortest path in unweighted graphs)</p>
+                        <p><strong>Time Complexity:</strong> O(V + E)</p>
+                        <p><strong>Space Complexity:</strong> O(V)</p>
+                    `;
+                    await bfs();
+                    break;
+                    
+                case 'dfs':
+                    explanation.innerHTML = `
+                        <h4>Depth-First Search (DFS)</h4>
+                        <p>DFS explores as far as possible along each branch before backtracking.</p>
+                        <p><strong>Completeness:</strong> No (may get stuck in infinite loops)</p>
+                        <p><strong>Time Complexity:</strong> O(V + E)</p>
+                        <p><strong>Space Complexity:</strong> O(V)</p>
+                    `;
+                    await dfs();
+                    break;
+                    
+                case 'dijkstra':
+                    explanation.innerHTML = `
+                        <h4>Dijkstra's Algorithm</h4>
+                        <p>Dijkstra's algorithm finds the shortest path between nodes in a graph with non-negative edge weights.</p>
+                        <p><strong>Completeness:</strong> Yes</p>
+                        <p><strong>Time Complexity:</strong> O((V + E) log V)</p>
+                        <p><strong>Space Complexity:</strong> O(V)</p>
+                    `;
+                    await dijkstra();
+                    break;
+                    
+                case 'astar':
+                    explanation.innerHTML = `
+                        <h4>A* Algorithm</h4>
+                        <p>A* is an informed search algorithm that uses a heuristic to guide its search towards the goal more efficiently.</p>
+                        <p><strong>Completeness:</strong> Yes</p>
+                        <p><strong>Time Complexity:</strong> Depends on heuristic</p>
+                        <p><strong>Space Complexity:</strong> O(V)</p>
+                    `;
+                    await aStar();
+                    break;
+            }
+            
+            isPathfinding = false;
+        }
+        
+        async function bfs() {
+            const queue = [];
+            const visited = new Set();
+            const parent = {};
+            
+            queue.push(startNode);
+            visited.add(`${startNode.row},${startNode.col}`);
+            
+            while (queue.length > 0) {
+                const current = queue.shift();
+                
+                // Skip visualization for start node
+                if (current !== startNode && current !== endNode) {
+                    current.element.classList.add('visited-node');
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+                
+                // Check if we've reached the end
+                if (current === endNode) {
+                    await reconstructPath(parent);
+                    return;
+                }
+                
+                // Get neighbors (up, down, left, right)
+                const neighbors = [
+                    grid[current.row - 1]?.[current.col],
+                    grid[current.row + 1]?.[current.col],
+                    grid[current.row]?.[current.col - 1],
+                    grid[current.row]?.[current.col + 1]
+                ].filter(neighbor => 
+                    neighbor && 
+                    !neighbor.isWall && 
+                    !visited.has(`${neighbor.row},${neighbor.col}`)
+                );
+                
+                for (const neighbor of neighbors) {
+                    visited.add(`${neighbor.row},${neighbor.col}`);
+                    parent[`${neighbor.row},${neighbor.col}`] = current;
+                    queue.push(neighbor);
+                }
+            }
+            
+            // If we get here, no path was found
+            alert('No path found!');
+        }
+        
+        async function dfs() {
+            const stack = [];
+            const visited = new Set();
+            const parent = {};
+            
+            stack.push(startNode);
+            visited.add(`${startNode.row},${startNode.col}`);
+            
+            while (stack.length > 0) {
+                const current = stack.pop();
+                
+                // Skip visualization for start node
+                if (current !== startNode && current !== endNode) {
+                    current.element.classList.add('visited-node');
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+                
+                // Check if we've reached the end
+                if (current === endNode) {
+                    await reconstructPath(parent);
+                    return;
+                }
+                
+                // Get neighbors (up, down, left, right)
+                const neighbors = [
+                    grid[current.row - 1]?.[current.col],
+                    grid[current.row + 1]?.[current.col],
+                    grid[current.row]?.[current.col - 1],
+                    grid[current.row]?.[current.col + 1]
+                ].filter(neighbor => 
+                    neighbor && 
+                    !neighbor.isWall && 
+                    !visited.has(`${neighbor.row},${neighbor.col}`)
+                );
+                
+                for (const neighbor of neighbors) {
+                    visited.add(`${neighbor.row},${neighbor.col}`);
+                    parent[`${neighbor.row},${neighbor.col}`] = current;
+                    stack.push(neighbor);
+                }
+            }
+            
+            // If we get here, no path was found
+            alert('No path found!');
+        }
+        
+        async function dijkstra() {
+            const distances = {};
+            const visited = new Set();
+            const parent = {};
+            const priorityQueue = [];
+            
+            // Initialize distances
+            for (let row = 0; row < GRID_ROWS; row++) {
+                for (let col = 0; col < GRID_COLS; col++) {
+                    distances[`${row},${col}`] = Infinity;
+                }
+            }
+            
+            distances[`${startNode.row},${startNode.col}`] = 0;
+            priorityQueue.push({ node: startNode, distance: 0 });
+            
+            while (priorityQueue.length > 0) {
+                // Sort queue by distance (simple priority queue implementation)
+                priorityQueue.sort((a, b) => a.distance - b.distance);
+                const { node: current, distance } = priorityQueue.shift();
+                
+                // Skip if we've already found a better path
+                if (visited.has(`${current.row},${current.col}`)) continue;
+                visited.add(`${current.row},${current.col}`);
+                
+                // Skip visualization for start node
+                if (current !== startNode && current !== endNode) {
+                    current.element.classList.add('visited-node');
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+                
+                // Check if we've reached the end
+                if (current === endNode) {
+                    await reconstructPath(parent);
+                    return;
+                }
+                
+                // Get neighbors (up, down, left, right)
+                const neighbors = [
+                    grid[current.row - 1]?.[current.col],
+                    grid[current.row + 1]?.[current.col],
+                    grid[current.row]?.[current.col - 1],
+                    grid[current.row]?.[current.col + 1]
+                ].filter(neighbor => 
+                    neighbor && 
+                    !neighbor.isWall && 
+                    !visited.has(`${neighbor.row},${neighbor.col}`)
+                );
+                
+                for (const neighbor of neighbors) {
+                    const newDistance = distance + 1; // All edges have weight 1 in this grid
+                    
+                    if (newDistance < distances[`${neighbor.row},${neighbor.col}`]) {
+                        distances[`${neighbor.row},${neighbor.col}`] = newDistance;
+                        parent[`${neighbor.row},${neighbor.col}`] = current;
+                        priorityQueue.push({ node: neighbor, distance: newDistance });
+                    }
+                }
+            }
+            
+            // If we get here, no path was found
+            alert('No path found!');
+        }
+        
+        async function aStar() {
+            const openSet = new Set();
+            const gScore = {};
+            const fScore = {};
+            const parent = {};
+            
+            // Initialize scores
+            for (let row = 0; row < GRID_ROWS; row++) {
+                for (let col = 0; col < GRID_COLS; col++) {
+                    gScore[`${row},${col}`] = Infinity;
+                    fScore[`${row},${col}`] = Infinity;
+                }
+            }
+            
+            gScore[`${startNode.row},${startNode.col}`] = 0;
+            fScore[`${startNode.row},${startNode.col}`] = heuristic(startNode, endNode);
+            
+            openSet.add(`${startNode.row},${startNode.col}`);
+            
+            while (openSet.size > 0) {
+                // Find node in openSet with lowest fScore
+                let currentKey = null;
+                let lowestFScore = Infinity;
+                
+                for (const key of openSet) {
+                    if (fScore[key] < lowestFScore) {
+                        lowestFScore = fScore[key];
+                        currentKey = key;
+                    }
+                }
+                
+                const [row, col] = currentKey.split(',').map(Number);
+                const current = grid[row][col];
+                openSet.delete(currentKey);
+                
+                // Skip visualization for start node
+                if (current !== startNode && current !== endNode) {
+                    current.element.classList.add('visited-node');
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+                
+                // Check if we've reached the end
+                if (current === endNode) {
+                    await reconstructPath(parent);
+                    return;
+                }
+                
+                // Get neighbors (up, down, left, right)
+                const neighbors = [
+                    grid[current.row - 1]?.[current.col],
+                    grid[current.row + 1]?.[current.col],
+                    grid[current.row]?.[current.col - 1],
+                    grid[current.row]?.[current.col + 1]
+                ].filter(neighbor => 
+                    neighbor && 
+                    !neighbor.isWall
+                );
+                
+                for (const neighbor of neighbors) {
+                    const tentativeGScore = gScore[currentKey] + 1; // All edges have weight 1
+                    
+                    if (tentativeGScore < gScore[`${neighbor.row},${neighbor.col}`]) {
+                        parent[`${neighbor.row},${neighbor.col}`] = current;
+                        gScore[`${neighbor.row},${neighbor.col}`] = tentativeGScore;
+                        fScore[`${neighbor.row},${neighbor.col}`] = tentativeGScore + heuristic(neighbor, endNode);
+                        
+                        if (!openSet.has(`${neighbor.row},${neighbor.col}`)) {
+                            openSet.add(`${neighbor.row},${neighbor.col}`);
+                        }
+                    }
+                }
+            }
+            
+            // If we get here, no path was found
+            alert('No path found!');
+        }
+        
+        function heuristic(nodeA, nodeB) {
+            // Manhattan distance
+            return Math.abs(nodeA.row - nodeB.row) + Math.abs(nodeA.col - nodeB.col);
+        }
+        
+        async function reconstructPath(parent) {
+            const path = [];
+            let current = endNode;
+            
+            while (current !== startNode) {
+                path.unshift(current);
+                current = parent[`${current.row},${current.col}`];
+            }
+            
+            // Visualize the path
+            for (const node of path) {
+                if (node !== endNode) {
+                    node.element.classList.add('path-node');
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+            }
+        }
+        
+        // ========== Binary Tree Algorithms ==========
+        class TreeNode {
+            constructor(value) {
+                this.value = value;
+                this.left = null;
+                this.right = null;
+                this.x = 0;
+                this.y = 0;
+                this.element = null;
+            }
+        }
+        
+        function generateRandomTree() {
+            if (isTraversing) return;
+            
+            treeContainer.innerHTML = '';
+            tree = null;
+            
+            // Generate random values
+            const values = [];
+            const count = Math.floor(Math.random() * 10) + 5; // 5-14 nodes
+            
+            for (let i = 0; i < count; i++) {
+                values.push(Math.floor(Math.random() * 100));
+            }
+            
+            // Build tree
+            for (const value of values) {
+                tree = insertNodeToTree(tree, value);
+            }
+            
+            // Calculate positions
+            const containerWidth = treeContainer.clientWidth;
+            const containerHeight = treeContainer.clientHeight;
+            calculatePositions(tree, containerWidth / 2, 50, containerWidth / 4);
+            
+            // Draw tree
+            drawTree(tree);
+            
+            // Update tree properties
+            updateTreeProperties();
+            
+            document.getElementById('traversal-result').textContent = '';
+        }
+        
+        function insertNodeToTree(root, value) {
+            if (!root) {
+                return new TreeNode(value);
+            }
+            
+            if (value < root.value) {
+                root.left = insertNodeToTree(root.left, value);
+            } else if (value > root.value) {
+                root.right = insertNodeToTree(root.right, value);
+            }
+            
+            return root;
+        }
+        
+        function calculatePositions(node, x, y, offset) {
+            if (!node) return;
+            
+            node.x = x;
+            node.y = y;
+            
+            if (node.left) {
+                calculatePositions(node.left, x - offset, y + 80, offset / 2);
+            }
+            
+            if (node.right) {
+                calculatePositions(node.right, x + offset, y + 80, offset / 2);
+            }
+        }
+        
+        function drawTree(node) {
+            if (!node) return;
+            
+            // Create node element
+            const nodeElement = document.createElement('div');
+            nodeElement.className = 'node';
+            nodeElement.style.left = `${node.x - 20}px`;
+            nodeElement.style.top = `${node.y}px`;
+            nodeElement.textContent = node.value;
+            nodeElement.dataset.value = node.value;
+            
+            // Add click event for deletion
+            nodeElement.addEventListener('click', function() {
+                if (!isTraversing) {
+                    nodeElement.style.backgroundColor = '#ef4444';
+                    setTimeout(() => {
+                        nodeElement.style.backgroundColor = '#10b981';
+                    }, 300);
+                }
+            });
+            
+            treeContainer.appendChild(nodeElement);
+            node.element = nodeElement;
+            
+            // Draw left child and connecting line
+            if (node.left) {
+                drawTree(node.left);
+                drawLine(node.x, node.y + 20, node.left.x, node.left.y);
+            }
+            
+            // Draw right child and connecting line
+            if (node.right) {
+                drawTree(node.right);
+                drawLine(node.x, node.y + 20, node.right.x, node.right.y);
+            }
+        }
+        
+        function drawLine(x1, y1, x2, y2) {
+            const line = document.createElement('div');
+            line.style.position = 'absolute';
+            line.style.backgroundColor = '#9ca3af';
+            
+            const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            line.style.width = `${length}px`;
+            line.style.height = '2px';
+            line.style.left = `${x1}px`;
+            line.style.top = `${y1}px`;
+            line.style.transformOrigin = '0 0';
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            treeContainer.appendChild(line);
+        }
+        
+        function traverseTree(order) {
+            if (isTraversing || !tree) return;
+            isTraversing = true;
+            
+            // Clear previous highlights
+            clearTreeHighlights();
+            
+            const result = [];
+            
+            switch (order) {
+                case 'inorder':
+                    inorderTraversal(tree, result);
+                    document.getElementById('traversal-result').textContent = 'Inorder: ' + result.join(' → ');
+                    break;
+                    
+                case 'preorder':
+                    preorderTraversal(tree, result);
+                    document.getElementById('traversal-result').textContent = 'Preorder: ' + result.join(' → ');
+                    break;
+                    
+                case 'postorder':
+                    postorderTraversal(tree, result);
+                    document.getElementById('traversal-result').textContent = 'Postorder: ' + result.join(' → ');
+                    break;
+            }
+            
+            // Animate traversal
+            animateTraversal(result);
+        }
+        
+        function inorderTraversal(node, result) {
+            if (!node) return;
+            
+            inorderTraversal(node.left, result);
+            result.push(node.value);
+            inorderTraversal(node.right, result);
+        }
+        
+        function preorderTraversal(node, result) {
+            if (!node) return;
+            
+            result.push(node.value);
+            preorderTraversal(node.left, result);
+            preorderTraversal(node.right, result);
+        }
+        
+        function postorderTraversal(node, result) {
+            if (!node) return;
+            
+            postorderTraversal(node.left, result);
+            postorderTraversal(node.right, result);
+            result.push(node.value);
+        }
+        
+        async function animateTraversal(values) {
+            for (const value of values) {
+                const nodeElement = document.querySelector(`.node[data-value="${value}"]`);
+                if (nodeElement) {
+                    nodeElement.style.backgroundColor = '#f59e0b';
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    nodeElement.style.backgroundColor = '#10b981';
+                }
+            }
+            
+            isTraversing = false;
+        }
+        
+        function clearTreeHighlights() {
+            const nodes = document.querySelectorAll('.node');
+            nodes.forEach(node => {
+                node.style.backgroundColor = '#10b981';
+            });
+        }
+        
+        function insertNode() {
+            if (isTraversing || !tree) return;
+            
+            const value = parseInt(prompt('Enter a number to insert:'));
+            if (isNaN(value)) return;
+            
+            tree = insertNodeToTree(tree, value);
+            
+            // Redraw tree
+            treeContainer.innerHTML = '';
+            const containerWidth = treeContainer.clientWidth;
+            const containerHeight = treeContainer.clientHeight;
+            calculatePositions(tree, containerWidth / 2, 50, containerWidth / 4);
+            drawTree(tree);
+            
+            updateTreeProperties();
+        }
+        
+        function deleteNode() {
+            if (isTraversing || !tree) return;
+            
+            const value = parseInt(prompt('Enter a number to delete:'));
+            if (isNaN(value)) return;
+            
+            tree = deleteNodeFromTree(tree, value);
+            
+            // Redraw tree
+            treeContainer.innerHTML = '';
+            if (tree) {
+                const containerWidth = treeContainer.clientWidth;
+                const containerHeight = treeContainer.clientHeight;
+                calculatePositions(tree, containerWidth / 2, 50, containerWidth / 4);
+                drawTree(tree);
+            }
+            
+            updateTreeProperties();
+        }
+        
+        function deleteNodeFromTree(root, value) {
+            if (!root) return null;
+            
+            if (value < root.value) {
+                root.left = deleteNodeFromTree(root.left, value);
+            } else if (value > root.value) {
+                root.right = deleteNodeFromTree(root.right, value);
+            } else {
+                // Node with only one child or no child
+                if (!root.left) {
+                    return root.right;
+                } else if (!root.right) {
+                    return root.left;
+                }
+                
+                // Node with two children: get inorder successor
+                root.value = minValue(root.right);
+                
+                // Delete the inorder successor
+                root.right = deleteNodeFromTree(root.right, root.value);
+            }
+            
+            return root;
+        }
+        
+        function minValue(node) {
+            let min = node.value;
+            while (node.left) {
+                min = node.left.value;
+                node = node.left;
+            }
+            return min;
+        }
+        
+        function updateTreeProperties() {
+            if (!tree) {
+                document.getElementById('tree-height').textContent = '0';
+                document.getElementById('node-count').textContent = '0';
+                document.getElementById('is-balanced').textContent = 'No';
+                return;
+            }
+            
+            document.getElementById('tree-height').textContent = getHeight(tree).toString();
+            document.getElementById('node-count').textContent = countNodes(tree).toString();
+            document.getElementById('is-balanced').textContent = isBalanced(tree) ? 'Yes' : 'No';
+        }
+        
+        function getHeight(node) {
+            if (!node) return 0;
+            return 1 + Math.max(getHeight(node.left), getHeight(node.right));
+        }
+        
+        function countNodes(node) {
+            if (!node) return 0;
+            return 1 + countNodes(node.left) + countNodes(node.right);
+        }
+        
+        function isBalanced(node) {
+            if (!node) return true;
+            
+            const leftHeight = getHeight(node.left);
+            const rightHeight = getHeight(node.right);
+            
+            return Math.abs(leftHeight - rightHeight) <= 1 && 
+                   isBalanced(node.left) && 
+                   isBalanced(node.right);
+        }
+    </script>
+</body>
+</html>
+
