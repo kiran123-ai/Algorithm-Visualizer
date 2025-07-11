@@ -1,5 +1,4 @@
-# Algorithm-Visualizer
-Algorithm Visualizer is a web-based tool that animates sorting and pathfinding algorithms. Built with HTML, CSS, and JavaScript, it helps users understand algorithm logic through interactive visualizations and customizable controls.
+
 # Algorithum Visualizer
 
 An interactive, browser-based tool designed to visualize popular algorithms step-by-step. Built with HTML, CSS, and JavaScript, this project helps users better understand how algorithms work by providing animated, user-controlled visualizations.
